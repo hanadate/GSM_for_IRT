@@ -97,3 +97,12 @@ dif_coefs <- foreach(i=1:5, .combine="rbind") %do% {
 }
 saveRDS(dif_coefs, "dif_coefs")
 dif_coefs <- readRDS("dif_coefs")  
+
+dif_coefs %>% 
+  dplyr::select(item, `z value`, stage) %>% 
+  dplyr::mutate(`z value`=round(`z value`,3)) %>% 
+  tidyr::pivot_wider(names_from=stage, values_from=`z value`) %>% 
+  as.matrix() %>% 
+  stargazer()
+
+
