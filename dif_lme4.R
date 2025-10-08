@@ -4,17 +4,18 @@ library(mixedpower)
 library(tidyverse)
 library(stargazer)
 
-#=== Example for detecting DIF by glmer
-dif <- with(VerbAgg, factor(0 + (Gender=="F" & mode == "do" & btype!="shout")))
-dif_gender <- glmer(
-  r2 ~ -1 + item + dif + Gender + (1 | id), 
-  data=VerbAgg, family=binomial
-)
-summary(dif_gender)
+# #=== Example for detecting DIF by glmer
+# dif <- with(VerbAgg, factor(0 + (Gender=="F" & mode == "do" & btype!="shout")))
+# dif_gender <- glmer(
+#   r2 ~ -1 + item + dif + Gender + (1 | id), 
+#   data=VerbAgg, family=binomial
+# )
+# summary(dif_gender)
 
 #=== Create data
 # params
 a <- c(0.5, 0.5, 0.5, 0.5, 0.5) # discrimination or slope
+# a <- c(1,1,1,1,1) # discrimination or slope
 b_ref <- c(0.0 ,0.0 ,0.0 ,0.0 ,0.0) # difficulty of reference group
 b_focal <- c(-1.0,-0.5,0.0,0.5,1.0) # difficulty of focal group
 d_ref <- -a * b_ref # intercept of reference group

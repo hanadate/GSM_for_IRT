@@ -21,5 +21,5 @@ of_5 <- getDesignGroupSequential(
 summary(of_5)
 plot(of_5)
 
-# designSet <- getDesignSet(designs = c(pocock_5, of_5), variedParameters = "typeOfDesign")
-# plot(designSet, type=1)
+designSet <- getDesignSet(designs = c(pocock_5, of_5), variedParameters = "typeOfDesign")
+plot(designSet, type=1, legendPosition=5)

@@ -95,8 +95,8 @@ dif_coefs <- foreach(i=1:5, .combine="rbind") %do% {
     mutate(stage=i)
   return(res)
 }
-saveRDS(dif_coefs, "dif_coefs")
-dif_coefs <- readRDS("dif_coefs")  
+saveRDS(dif_coefs, "dif_coefs.rds")
+dif_coefs <- readRDS("dif_coefs.rds")  
 
 dif_coefs %>% 
   dplyr::select(item, `z value`, stage) %>% 
