@@ -18,10 +18,11 @@ N <- c(100,200,300,400)
 
 numCores <- parallel::detectCores()
 numCores
-cl <- makeCluster(15)
+cl <- makeCluster(numCores-1)
 registerDoParallel(cl)
 
-dif_coefs_multi <- foreach(j=1:10, .combine="rbind", 
+t <- proc.time()
+dif_coefs_multi <- foreach(j=1:1000, .combine="rbind", 
                            .packages=c("tidyverse","mirt","foreach","lme4")) %dopar% {
   # simdata
   set.seed(j)
@@ -105,6 +106,7 @@ dif_coefs_multi <- foreach(j=1:10, .combine="rbind",
     return(res)
   }
 }
+(proc.time()-t)
 dif_coefs_multi
 stopCluster(cl)
 saveRDS(dif_coefs_multi, "dif_coefs_multi.rds")
@@ -157,3 +159,29 @@ dif_stage
   dplyr::select(item, stage, of) %>% 
   tidyr::pivot_wider(names_from=stage, values_from=of))
 
+#=== stargazer
+pocock_stage %>% 
+  as.matrix() %>% 
+  stargazer()
+
+of_stage %>% 
+  as.matrix() %>% 
+  stargazer()
+
+#=== expected reduction
+pocock_stage %>%
+  ungroup() %>% 
+  dplyr::select(-item) %>% 
+  rowSums()
+# pocock item1
+((11*1+66*2+172*3+277*4+233*5)/759)*20 
+# pocock item5
+((13*1+57*2+173*3+297*4+240*5)/780)*20
+of_stage %>%
+  ungroup() %>% 
+  dplyr::select(-item) %>% 
+  rowSums()
+# of item1
+((1*1+2*3+3*129+4*487+5*318)/938)*20
+# of item5
+((1*0+2*3+3*106+4*513+5*320)/942)*20
