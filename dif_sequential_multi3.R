@@ -13,7 +13,10 @@ params <- expand.grid(nitem=c(10,30),
                       mdif=c(0.5,1.0),
                       pdif=c(0.1,0.3),
                       N=c(400,1000),
-                      stages=c(2,5))
+                      stages=c(2,5)) %>% 
+  mutate(ndif=nitem*pdif)
+params
+
 
 res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
   param <- params[k,]
@@ -53,14 +56,13 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
             # long form
             dat_longer <- tidyr::pivot_longer(dat, cols=starts_with("Item"), names_to="item", values_to="resp")
             
+            # TODO
             items <- unique(dat_longer$item)
-            difs <- foreach(i=items, .combine="cbind") %do% {
-              new_col_name <- paste0("dif_", i)
-              dif <- with(dat_longer, factor(0+(group=="focal" & item==i)))
-              data.frame(dif) %>% 
-                rename(!!new_col_name :=dif)
-            }
-            dat_longer_all <- cbind(dat_longer, difs)
+            dif_items <- items[(length(items)-param$ndif+1):length(items)]
+            
+            dif <- with(dat_longer, factor(0+(group=="focal" & item %in% dif_items)))
+            dat_longer_all <- cbind(dat_longer, dif)
+            
             
             zvalues <- foreach(j=1:param$stages, .combine="rbind") %do% {
               print(paste0("stage: ",j))
@@ -68,22 +70,13 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
               dat_longer <- dat_longer_all %>% 
                 dplyr::filter(stage <= j) %>% 
                 dplyr::select(-stage)
-              
-              coefs <- foreach(i=items, .combine="rbind") %do% { 
-                print(i)
-                dif <- paste0("dif_", i)
-                form <- as.formula(paste0("resp ~ -1 + item + ", dif ," + group + (1 | id)"))
-                res <- glmer(
-                  form,
-                  data=dat_longer, family=binomial
-                )
-                (coef <- summary(res)$coefficients)
-                data.frame(z=coef[startsWith(rownames(coef), "dif_Item_"),"z value"],
-                           item=i,
-                           stage=j,
-                           nsim=l,
-                           params=k)
-              }
+              res <- glmer(resp ~ -1 + item + dif + group + (1 | id),
+                           data=dat_longer, family=binomial)
+              (coef <- summary(res)$coefficients)
+              data.frame(z=coef[startsWith(rownames(coef), "dif"),"z value"],
+                         stage=j,
+                         nsim=l,
+                         params=k)
             }
           }
 }

@@ -9,7 +9,7 @@ library(rpact)
 
 #=== Create data
 # params
-a <- c(0.5, 0.5, 0.5, 0.5, 0.5) # discrimination or slope
+a <- c(1.0, 1.0, 1.0, 1.0, 1.0) # discrimination or slope
 b_ref <- c(0.0 ,0.0 ,0.0 ,0.0 ,0.0) # difficulty of reference group
 b_focal <- c(-1.0,-0.5,0.0,0.5,1.0) # difficulty of focal group
 d_ref <- -a * b_ref # intercept of reference group
