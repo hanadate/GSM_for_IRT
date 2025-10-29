@@ -12,7 +12,7 @@ library(rpact)
 params <- expand.grid(nitem=c(10,30),
                       mdif=c(0.0,0.5,1.0),
                       pdif=c(0.1,0.3),
-                      N=c(400,1000),
+                      N=c(500,1000),
                       stages=c(2,5),
                       position="difficult") %>% 
   mutate(ndif=nitem*pdif,
@@ -81,7 +81,6 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
                          params=k)
             }
           }
-  saveRDS(zvalues, paste0("zvalues_difficult_params_",k,".rds"))
 }
 (now()-t)
 res
