@@ -86,8 +86,8 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
 (now()-t)
 res
 stopCluster(cl)
-saveRDS(res, "zvalues_middle.rds")
-res <- readRDS("zvalues_middle.rds")
+write_csv(res, "zvalues_middle.csv")
+res <- read_csv("zvalues_middle.csv")
 
 #=== Critical values
 pocock_5 <- getDesignGroupSequential(
@@ -156,10 +156,15 @@ dif_stage
     dplyr::mutate(expected_rate=ifelse(stages==2,
                                        (`1`*1/2+`2`*2/2)/(`1`+`2`),
                                        (`1`*1/5+`2`*2/5+`3`*3/5+`4`*4/5+`5`*5/5)/(`1`+`2`+`3`+`4`+`5`)),
-                  expected_size=expected_rate*N))
+                  expected_size=expected_rate*N,
+                  detect_rate=ifelse(stages==2,
+                                     (`1`+`2`)/niter,
+                                     (`1`+`2`+`3`+`4`+`5`)/niter)))
 pocock_stage %>% 
+  ungroup %>% 
+  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,expected_size, detect_rate) %>% 
   as.matrix %>% 
-  stargazer
+  stargazer(., digits=2)
 # pocock_stage %>% View
 
 (of_stage <- dif_stage %>% 
@@ -168,9 +173,15 @@ pocock_stage %>%
     dplyr::mutate(expected_rate=ifelse(stages==2,
                                        (`1`*1/2+`2`*2/2)/(`1`+`2`),
                                        (`1`*1/5+`2`*2/5+`3`*3/5+`4`*4/5+`5`*5/5)/(`1`+`2`+`3`+`4`+`5`)),
-                  expected_size=expected_rate*N))
+                  expected_size=expected_rate*N,
+                  detect_rate=ifelse(stages==2,
+                                     (`1`+`2`)/niter,
+                                     (`1`+`2`+`3`+`4`+`5`)/niter)))
 
 of_stage %>% 
+  ungroup %>% 
+  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,expected_size, detect_rate) %>% 
   as.matrix %>% 
-  stargazer
+  stargazer(., digits=2)
 # of_stage %>% View
+
