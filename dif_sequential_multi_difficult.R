@@ -155,13 +155,13 @@ dif_stage
     dplyr::mutate(expected_rate=ifelse(stages==2,
                                        (`1`*1/2+`2`*2/2)/(`1`+`2`),
                                        (`1`*1/5+`2`*2/5+`3`*3/5+`4`*4/5+`5`*5/5)/(`1`+`2`+`3`+`4`+`5`)),
-                  expected_size=expected_rate*N,
                   detect_rate=ifelse(stages==2,
                                      (`1`+`2`)/niter,
-                                     (`1`+`2`+`3`+`4`+`5`)/niter)))
+                                     (`1`+`2`+`3`+`4`+`5`)/niter),
+                  expected_size=(detect_rate*expected_rate+(1-detect_rate)*1)*N))
 pocock_stage %>%
   ungroup %>% 
-  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,expected_size, detect_rate) %>% 
+  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
   as.matrix %>% 
   stargazer(., digits=2)
 # pocock_stage %>% View
@@ -172,14 +172,14 @@ pocock_stage %>%
     dplyr::mutate(expected_rate=ifelse(stages==2,
                                        (`1`*1/2+`2`*2/2)/(`1`+`2`),
                                        (`1`*1/5+`2`*2/5+`3`*3/5+`4`*4/5+`5`*5/5)/(`1`+`2`+`3`+`4`+`5`)),
-                  expected_size=expected_rate*N,
                   detect_rate=ifelse(stages==2,
                                      (`1`+`2`)/niter,
-                                     (`1`+`2`+`3`+`4`+`5`)/niter)))
+                                     (`1`+`2`+`3`+`4`+`5`)/niter),
+                  expected_size=(detect_rate*expected_rate+(1-detect_rate)*1)*N))
 
 of_stage %>% 
   ungroup %>% 
-  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,expected_size, detect_rate) %>% 
+  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
   as.matrix %>% 
   stargazer(., digits=2)
 # of_stage %>% View
