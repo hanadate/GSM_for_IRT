@@ -9,7 +9,7 @@ library(rpact)
 
 (t <- now())
 #=== simulation settings
-params <- expand.grid(nitem=c(10,30),
+params <- expand.grid(nitem=c(10,30), # input even number
                       mdif=c(0.0,0.5,1.0),
                       pdif=c(0.1,0.3),
                       N=c(500,1000),

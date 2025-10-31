@@ -9,7 +9,7 @@ library(rpact)
 
 (t <- now())
 #=== simulation settings
-params <- expand.grid(nitem=c(10,30),
+params <- expand.grid(nitem=c(10,30), # input even number
                       mdif=c(0.0,0.5,1.0),
                       pdif=c(0.1,0.3),
                       N=c(500,1000),
@@ -60,7 +60,7 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
             dat_longer <- tidyr::pivot_longer(dat, cols=starts_with("Item"), names_to="item", values_to="resp")
             
             items <- unique(dat_longer$item)
-            dif_items <- items[(length(items)-param$ndif+1):length(items)]
+            dif_items <- items[1:(param$ndif)]
             
             dif <- with(dat_longer, factor(0+(group=="focal" & item %in% dif_items)))
             dat_longer_all <- cbind(dat_longer, dif)
