@@ -35,7 +35,7 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
   
   numCores <- parallel::detectCores()
   numCores
-  cl <- makeCluster(numCores-5)
+  cl <- makeCluster(numCores-4)
   registerDoParallel(cl)
   
   foreach(l=1:niter, .combine="rbind", 
