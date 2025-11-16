@@ -20,7 +20,7 @@ params <- expand.grid(nitem=c(10,30), # input even number
 params
 niter <- 1000
 
-res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
+for (k in 1:nrow(params)) {
   param <- params[k,]
   print(param)
   print(now())
@@ -36,58 +36,64 @@ res <- foreach(k=1:nrow(params), .combine="rbind") %do% {
   
   numCores <- parallel::detectCores()
   numCores
-  cl <- makeCluster(numCores-5)
+  cl <- makeCluster(numCores-4)
   registerDoParallel(cl)
   
-  foreach(l=1:niter, .combine="rbind", 
-          .packages=c("tidyverse","mirt","foreach","lme4")) %dopar% {  
-            # simdata
-            set.seed(l)
-            dat_ref <- simdata(a=a, d=d_ref, N=param$N/2, itemtype="dich") %>% 
-              as.data.frame() %>% 
-              dplyr::mutate(group="ref") %>% 
-              mutate(stage = as.integer((row_number() - 1) %% param$stages + 1))
-            set.seed(l+niter)
-            dat_focal <- simdata(a=a, d=d_focal, N=param$N/2, itemtype="dich") %>% 
-              as.data.frame() %>% 
-              dplyr::mutate(group="focal") %>% 
-              mutate(stage = as.integer((row_number() - 1) %% param$stages + 1))
-            
-            # bind
-            dat <- rbind(dat_ref, dat_focal) %>% 
-              dplyr::mutate(id=row_number())
-            
-            # long form
-            dat_longer <- tidyr::pivot_longer(dat, cols=starts_with("Item"), names_to="item", values_to="resp")
-            
-            items <- unique(dat_longer$item)
-            dif_items <- items[(length(items)/2-round(param$ndif/2,0)+1):(length(items)/2-round(param$ndif/2,0)+param$ndif)]
-            
-            dif <- with(dat_longer, factor(0+(group=="focal" & item %in% dif_items)))
-            dat_longer_all <- cbind(dat_longer, dif)
-            
-            
-            zvalues <- foreach(j=1:param$stages, .combine="rbind") %do% {
-              print(paste0("stage: ",j))
-              # calc z-value for each stage
-              dat_longer <- dat_longer_all %>% 
-                dplyr::filter(stage <= j) %>% 
-                dplyr::select(-stage)
-              res <- glmer(resp ~ -1 + item + dif + group + (1 | id),
-                           data=dat_longer, family=binomial)
-              (coef <- summary(res)$coefficients)
-              data.frame(z=coef[startsWith(rownames(coef), "dif"),"z value"],
-                         stage=j,
-                         nsim=l,
-                         params=k)
-            }
-          }
+  zvalues <- foreach(l=1:niter, .combine="rbind", 
+                     .packages=c("tidyverse","mirt","foreach","lme4")) %dopar% {  
+                       # simdata
+                       set.seed(l)
+                       dat_ref <- simdata(a=a, d=d_ref, N=param$N/2, itemtype="dich") %>% 
+                         as.data.frame() %>% 
+                         dplyr::mutate(group="ref") %>% 
+                         mutate(stage = as.integer((row_number() - 1) %% param$stages + 1))
+                       set.seed(l+niter)
+                       dat_focal <- simdata(a=a, d=d_focal, N=param$N/2, itemtype="dich") %>% 
+                         as.data.frame() %>% 
+                         dplyr::mutate(group="focal") %>% 
+                         mutate(stage = as.integer((row_number() - 1) %% param$stages + 1))
+                       
+                       # bind
+                       dat <- rbind(dat_ref, dat_focal) %>% 
+                         dplyr::mutate(id=row_number())
+                       
+                       # long form
+                       dat_longer <- tidyr::pivot_longer(dat, cols=starts_with("Item"), names_to="item", values_to="resp")
+                       
+                       items <- unique(dat_longer$item)
+                       dif_items <- items[(length(items)/2-round(param$ndif/2,0)+1):(length(items)/2-round(param$ndif/2,0)+param$ndif)]
+                       
+                       dif <- with(dat_longer, factor(0+(group=="focal" & item %in% dif_items)))
+                       dat_longer_all <- cbind(dat_longer, dif)
+                       
+                       
+                       zvalues_tmp <- foreach(j=1:param$stages, .combine="rbind") %do% {
+                         print(paste0("stage: ",j))
+                         # calc z-value for each stage
+                         dat_longer <- dat_longer_all %>% 
+                           dplyr::filter(stage <= j) %>% 
+                           dplyr::select(-stage)
+                         res <- glmer(resp ~ -1 + item + dif + group + (1 | id),
+                                      data=dat_longer, family=binomial)
+                         (coef <- summary(res)$coefficients)
+                         data.frame(z=coef[startsWith(rownames(coef), "dif"),"z value"],
+                                    stage=j,
+                                    nsim=l,
+                                    params=k)
+                       }
+                     }
+  write_csv(zvalues, paste0("zvalues_middle/zvalues_middle_",k,".csv"))
 }
 (now()-t)
-res
 stopCluster(cl)
-write_csv(res, "zvalues_middle.csv")
-res <- read_csv("zvalues_middle.csv")
+folder_path <- "zvalues_middle"
+file_list <- list.files(folder_path, pattern="\\.csv$", full.names=TRUE, recursive=TRUE)
+res <- file_list %>%
+  lapply(read_csv) %>%
+  bind_rows()
+res
+write_csv(res, "zvalues_middle_all.csv")
+res <- read_csv("zvalues_middle_all.csv")
 
 #=== Critical values
 pocock_5 <- getDesignGroupSequential(
