@@ -20,10 +20,10 @@ params <- expand.grid(nitem=c(10,30), # input even number
 params
 niter <- 1000
 
-for (k in 14:nrow(params)) {
+for (k in 1:nrow(params)) {
   param <- params[k,]
-  print(param)
   print(now())
+  print(param)
   #=== Create data
   # params
   a <- rep(1.0, param$nitem) # discrimination or slope
@@ -73,7 +73,7 @@ for (k in 14:nrow(params)) {
                            dplyr::filter(stage <= j) %>% 
                            dplyr::select(-stage)
                          res <- glmer(resp ~ -1 + item + dif + group + (1 | id),
-                                      data=dat_longer, family=binomial)
+                                      data=dat_longer, family=binomial, nAGQ=0)
                          (coef <- summary(res)$coefficients)
                          data.frame(z=coef[startsWith(rownames(coef), "dif"),"z value"],
                                     stage=j,
@@ -82,6 +82,7 @@ for (k in 14:nrow(params)) {
                        }
                      }
   write_csv(zvalues, paste0("zvalues_easy/zvalues_easy_",k,".csv"))
+  gc()
 }
 (now()-t)
 stopCluster(cl)
