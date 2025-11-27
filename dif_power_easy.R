@@ -9,7 +9,7 @@ library(doParallel)
 params <- expand.grid(nitem=c(10,30), # input even number
                       mdif=c(0,0.5,1.0),
                       pdif=c(0.1,0.3),
-                      position="difficult") %>% 
+                      position="easy") %>% 
   mutate(ndif=nitem*pdif,
          params=row_number())
 params
@@ -23,8 +23,8 @@ dif_power_all <-  foreach(k=1:nrow(params), .combine="rbind") %do% {
   # params
   a <- rep(1.0, param$nitem) # discrimination or slope
   b_ref <- seq(-3, 3, length.out=param$nitem) # difficulty of reference group
-  b_focal <- c(b_ref[1:(length(b_ref)-length(b_ref)*param$pdif)],
-               b_ref[(length(b_ref)-length(b_ref)*param$pdif+1):length(b_ref)]+param$mdif) # difficulty of focal group
+  b_focal <- c(b_ref[1:(length(b_ref)*param$pdif)]+param$mdif, 
+               b_ref[(length(b_ref)*param$pdif+1):length(b_ref)])
   d_ref <- -a * b_ref # intercept of reference group
   d_focal <- -a * b_focal # intercept of focal group
  
@@ -46,7 +46,7 @@ dif_power_all <-  foreach(k=1:nrow(params), .combine="rbind") %do% {
   dat_longer <- tidyr::pivot_longer(dat, cols=starts_with("Item"), names_to="item", values_to="resp")
   
   items <- unique(dat_longer$item)
-  dif_items <- items[(length(items)-param$ndif+1):length(items)]
+  dif_items <- items[1:(param$ndif)]
   
   dif <- with(dat_longer, factor(0+(group=="focal" & item %in% dif_items)))
   dat_longer_all <- cbind(dat_longer, dif)
@@ -65,10 +65,9 @@ dif_power_all <-  foreach(k=1:nrow(params), .combine="rbind") %do% {
   print(dif_power)
   return(dif_power)
 }
-write_csv(dif_power_all, "dif_power_difficult.csv")
+write_csv(dif_power_all, "dif_power_easy.csv")
 
-dif_power_all <- read_csv("dif_power_difficult.csv")
+dif_power_all <- read_csv("dif_power_easy.csv")
 dif_power_all
-
 
 

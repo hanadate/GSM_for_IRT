@@ -82,3 +82,4 @@ p2 <- ggplot(df_non, aes(x = Theta, y = Probability, linetype = Group)) +
 # -------------------------------------------------------------------
 # Arrange the two plots side-by-side
 grid.arrange(p1, p2, ncol = 2)
+
