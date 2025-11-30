@@ -70,4 +70,9 @@ write_csv(dif_power_all, "dif_power_easy.csv")
 dif_power_all <- read_csv("dif_power_easy.csv")
 dif_power_all
 
+dif_power_easy_params <- params %>% 
+  left_join(., dif_power_all, by=c("params"="param"))
+  
+
+
 
