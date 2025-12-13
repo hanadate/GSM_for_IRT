@@ -168,7 +168,7 @@ dif_stage
                   expected_size=(detect_rate*expected_rate+(1-detect_rate)*1)*N))
 pocock_stage %>%
   ungroup %>% 
-  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
+  select(stages,N,pdif,mdif,nitem,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
   as.matrix %>% 
   stargazer(., digits=2)
 # pocock_stage %>% View
@@ -186,7 +186,7 @@ pocock_stage %>%
 
 of_stage %>% 
   ungroup %>% 
-  select(nitem,mdif,pdif,N,stages,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
+  select(stages,N,pdif,mdif,nitem,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
   as.matrix %>% 
   stargazer(., digits=2)
 # of_stage %>% View

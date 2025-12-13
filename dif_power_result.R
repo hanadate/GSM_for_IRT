@@ -30,7 +30,7 @@ dif_power_difficult <- read_csv("dif_power_difficult.csv") %>%
 
 dif_power_all <- 
   bind_rows(dif_power_easy, dif_power_middle, dif_power_difficult) %>% 
-  select(nitem, mdif, pdif, position,`250`, `500`, `750`, `1000`)
+  select(position, pdif, mdif, nitem, `250`, `500`, `750`, `1000`)
 dif_power_all %>% 
   as.matrix() %>% 
   stargazer()
