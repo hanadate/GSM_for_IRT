@@ -171,6 +171,11 @@ pocock_stage %>%
   select(stages,N,pdif,mdif,nitem,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
   as.matrix %>% 
   stargazer(., digits=2)
+pocock_stage %>% 
+  mutate(position="easy",
+         boundary="pocock",
+         .before=1) %>% 
+  write_csv("dif_sequential_multi_easy_pocock.csv")
 # pocock_stage %>% View
 
 (of_stage <- dif_stage %>% 
@@ -189,4 +194,9 @@ of_stage %>%
   select(stages,N,pdif,mdif,nitem,`1`,`2`,`3`,`4`,`5`,detect_rate,expected_size) %>% 
   as.matrix %>% 
   stargazer(., digits=2)
+of_stage %>% 
+  mutate(position="easy",
+         boundary="obf",
+         .before=1) %>% 
+  write_csv("dif_sequential_multi_easy_obf.csv")
 # of_stage %>% View
